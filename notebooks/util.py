@@ -15,7 +15,7 @@ def df_for_csv(path):
     :param path: het pad van de csv bestand om te lezen
     :return: een dataframe
     """
-    df = pd.read_csv(path, delimiter='\t')
+    df = pd.read_csv(path, delimiter='\t', skiprows=70)
     df.columns = ["x", "y"]
     return df
 
@@ -39,7 +39,11 @@ def df_for_params(salinity, v=False):
 
     def noise_reduction_for_df(df):
         y = df["y"]
-        y = signal.savgol_filter(y, 11, 4)
+        n = 3  # the larger n is, the smoother curve will be
+        b = [1.0 / n] * n
+        a = 1
+        y = signal.lfilter(b, a, y)
+
         df["y"] = y
         return df
 
@@ -55,11 +59,14 @@ def df_for_params(salinity, v=False):
         dy = np.array(np.diff(y) / dx)
         dy = np.append(dy, 0)
 
+        for i in range(len(dy)):
+            if np.abs(dy[i]) > 5:
+                dy[i] = 0
         if v:
             plt.plot(df["x"], dy)
             plt.show()
 
-        df["dy"] = dy
+        df["dy"] = dy ** 3
         return df
 
     df_a = avg_df(DF_PART_A)
@@ -84,12 +91,12 @@ def df_for_params(salinity, v=False):
 
 def delay_for_df(df, v=False):
     Ax = np.array(df["Ax"])
-    Ay = np.array(df["Ay"])
+    Ay = np.array(df["Ady"])
     Bx = np.array(df["Bx"])
-    By = np.array(df["By"])
+    By = np.array(df["Bdy"])
 
-    s = 50
-    noise_p = 10
+    s = 40
+    noise_p = 20
     min_snr = 3
     peaks_a = signal.find_peaks_cwt(Ay, s, noise_perc=noise_p, min_snr=min_snr)
     peaks_b = signal.find_peaks_cwt(By, s, noise_perc=noise_p, min_snr=min_snr)
@@ -102,6 +109,7 @@ def delay_for_df(df, v=False):
         plt.vlines([Ax[i] for i in peaks_a], 0, 200)
         plt.plot(Bx, By)
         plt.vlines([Bx[i] for i in peaks_b], 0, 200)
+        plt.ylim(-7, 7)
         plt.show()
 
 
