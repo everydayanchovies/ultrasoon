@@ -1,7 +1,5 @@
 import numpy as np
 import pandas as pd
-import matplotlib
-from scipy import signal
 from matplotlib import pyplot as plt
 from scipy.signal import hilbert
 
@@ -43,11 +41,9 @@ def x_y_pairs_couple_for_params(salinity, v=False):
 
     a = avg_x_y_pairs(DF_PART_A)
     a = envelope_for_x_y_pairs(*a)
-    # x_a, y_a = a
 
     b = avg_x_y_pairs(DF_PART_B)
     b = envelope_for_x_y_pairs(*b)
-    # x_b, y_b = b
 
     if v:
         plt.plot(*a)
@@ -57,7 +53,77 @@ def x_y_pairs_couple_for_params(salinity, v=False):
     return *a, *b
 
 
+def index_of_next_peak(y, v=False):
+    rms = np.sqrt(np.mean(y ** 2))
+
+    window_len = 1
+
+    last_max = y[0]
+    count_since_max = 0
+    for i in range(len(y)):
+        if i < window_len:
+            continue
+
+        if y[i] > last_max:
+            last_max = y[i]
+            count_since_max = 0
+
+        if count_since_max > 100 and last_max > rms:
+            return i - count_since_max
+
+        count_since_max += 1
+
+    print("ERROR")
+
+
+def index_of_next_min(y, v=False):
+    near_min_y = np.argmin(y) * 4
+
+    window_len = 1
+
+    last_min = y[0]
+    count_since_min = 0
+    for i in range(len(y)):
+        if i < window_len:
+            continue
+
+        if y[i] < last_min:
+            last_min = y[i]
+            count_since_min = 0
+
+        if count_since_min > 100:
+            return i - 100
+
+        count_since_min += 1
+
+
+def eat_peak(x, y, v=False):
+    """
+    Will remove everything right of the highest peak.
+    :param x:
+    :param y:
+    :param v:
+    :return:
+    """
+
+    next_min_i = index_of_next_min(y, v=v)
+
+    max_i = index_of_next_peak(y[next_min_i:]) + next_min_i
+    max_x = x[max_i]
+    right_x, right_y = x[max_i:], y[max_i:]
+
+    if v:
+        plt.plot(x, y, 'r-', alpha=0.4)
+        plt.plot(right_x, right_y, alpha=1)
+        plt.show()
+
+    return max_x, (right_x, right_y)
+
+
 def delay_for_x_y_pairs_couple(x_a, y_a, x_b, y_b, v=False):
-    pass
+    peak_a, _ = eat_peak(x_a, y_a, v=v)
 
+    _, right = eat_peak(x_b, y_b, v=v)
+    peak_b, _ = eat_peak(*right, v=v)
 
+    return peak_b - peak_a
