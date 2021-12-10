@@ -37,19 +37,43 @@ def df_for_params(salinity, v=False):
         df["y"] = w_avg_y
         return df
 
+    def noise_reduction_for_df(df):
+        y = df["y"]
+        y = signal.savgol_filter(y, 11, 4)
+        df["y"] = y
+        return df
+
     def envelope_for_df(df):
         y = df["y"]
         y = y - np.mean(y)
         df["y"] = np.abs(hilbert(y))
         return df
 
+    def derivative_for_df(df, v=False):
+        dx = 1
+        y = np.array(df["y"])
+        dy = np.array(np.diff(y) / dx)
+        dy = np.append(dy, 0)
+
+        if v:
+            plt.plot(df["x"], dy)
+            plt.show()
+
+        df["dy"] = dy
+        return df
+
     df_a = avg_df(DF_PART_A)
+    df_a = noise_reduction_for_df(df_a)
     df_a = envelope_for_df(df_a)
+    df_a = derivative_for_df(df_a, v=v)
+
     df_b = avg_df(DF_PART_B)
+    df_b = noise_reduction_for_df(df_b)
     df_b = envelope_for_df(df_b)
+    df_b = derivative_for_df(df_b, v=v)
 
     df = pd.concat([df_a, df_b], axis=1)
-    df.columns = ["Ax", "Ay", "Bx", "By"]
+    df.columns = ["Ax", "Ay", "Ady", "Bx", "By", "Bdy"]
 
     if v:
         plt.plot(df["Ax"], df["Ay"])
