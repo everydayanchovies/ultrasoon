@@ -26,7 +26,7 @@ def df_for_params(salinity, v=False):
         w_x = []
         w_avg_y = []
         for i in range(1, 4):
-            filepath = f"../data/{salinity} promille zout {signal_part} ({i})"
+            filepath = f"../data/{salinity:.1f} promille zout {signal_part} ({i})"
             df = df_for_csv(filepath)
             if len(w_x) == 0:
                 w_x = np.array(df["x"])
