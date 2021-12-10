@@ -33,7 +33,7 @@ def df_for_params(salinity, v=False):
                 w_avg_y = np.array(df["y"])
             else:
                 # todo this is fishy
-                w_avg_y = np.average([w_avg_y, np.array(df["x"])], axis=0)
+                w_avg_y = np.average([w_avg_y, np.array(df["y"])], axis=0)
         df["y"] = w_avg_y
         return df
 
@@ -64,8 +64,11 @@ def delay_for_df(df, v=False):
     Bx = np.array(df["Bx"])
     By = np.array(df["By"])
 
-    peaks_a = signal.find_peaks_cwt(Ay, 20)
-    peaks_b = signal.find_peaks_cwt(By, 0.1)
+    s = 50
+    noise_p = 10
+    min_snr = 3
+    peaks_a = signal.find_peaks_cwt(Ay, s, noise_perc=noise_p, min_snr=min_snr)
+    peaks_b = signal.find_peaks_cwt(By, s, noise_perc=noise_p, min_snr=min_snr)
 
     if v:
         print(peaks_a)
@@ -73,10 +76,12 @@ def delay_for_df(df, v=False):
 
         plt.plot(Ax, Ay)
         plt.vlines([Ax[i] for i in peaks_a], 0, 200)
+        plt.plot(Bx, By)
+        plt.vlines([Bx[i] for i in peaks_b], 0, 200)
         plt.show()
 
 
 
-    return np.abs(Ax[peaks_a[1]] - Bx[peaks_b[0]])
+    return np.abs(Ax[peaks_a[2]] - Bx[peaks_b[1]])
 
 
