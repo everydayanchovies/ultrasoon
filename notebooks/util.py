@@ -30,7 +30,6 @@ def x_y_pairs_couple_for_params(salinity, v=False):
                 w_x = np.array(x)
                 w_avg_y = np.array(y)
             else:
-                # todo this is fishy maybe?
                 w_avg_y = np.average([w_avg_y, np.array(y)], axis=0)
         return w_x, w_avg_y
 
@@ -53,7 +52,7 @@ def x_y_pairs_couple_for_params(salinity, v=False):
     return *a, *b
 
 
-def index_of_next_peak(y, v=False):
+def index_of_next_peak(y):
     rms = np.sqrt(np.mean(y ** 2))
 
     window_len = 1
@@ -68,17 +67,15 @@ def index_of_next_peak(y, v=False):
             last_max = y[i]
             count_since_max = 0
 
-        if count_since_max > 100 and last_max > rms:
+        if count_since_max > 50 and last_max > rms:
             return i - count_since_max
 
         count_since_max += 1
 
-    print("ERROR")
+    raise ValueError
 
 
-def index_of_next_min(y, v=False):
-    near_min_y = np.argmin(y) * 4
-
+def index_of_next_min(y):
     window_len = 1
 
     last_min = y[0]
@@ -91,10 +88,12 @@ def index_of_next_min(y, v=False):
             last_min = y[i]
             count_since_min = 0
 
-        if count_since_min > 100:
-            return i - 100
+        if count_since_min > 50:
+            return i - count_since_min
 
         count_since_min += 1
+
+    raise ValueError
 
 
 def eat_peak(x, y, v=False):
@@ -106,7 +105,7 @@ def eat_peak(x, y, v=False):
     :return:
     """
 
-    next_min_i = index_of_next_min(y, v=v)
+    next_min_i = index_of_next_min(y)
 
     max_i = index_of_next_peak(y[next_min_i:]) + next_min_i
     max_x = x[max_i]
@@ -125,5 +124,11 @@ def delay_for_x_y_pairs_couple(x_a, y_a, x_b, y_b, v=False):
 
     _, right = eat_peak(x_b, y_b, v=v)
     peak_b, _ = eat_peak(*right, v=v)
+
+    if v:
+        plt.plot(x_a, y_a)
+        plt.plot(x_b, y_b)
+        plt.hlines(50, peak_a, peak_b, colors='r')
+        plt.show()
 
     return peak_b - peak_a
