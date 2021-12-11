@@ -96,9 +96,10 @@ def index_of_next_min(y):
     raise ValueError
 
 
-def eat_peak(x, y, v=False):
+def eat_peak(x, y, n=1, v=False):
     """
     Will remove everything right of the highest peak.
+    :param n:
     :param x:
     :param y:
     :param v:
@@ -112,18 +113,21 @@ def eat_peak(x, y, v=False):
     right_x, right_y = x[max_i:], y[max_i:]
 
     if v:
-        plt.plot(x, y, 'r-', alpha=0.4)
+        plt.plot(x, y, linestyle="dashed", alpha=0.4)
         plt.plot(right_x, right_y, alpha=1)
-        plt.show()
 
-    return max_x, (right_x, right_y)
+    if n <= 1:
+        if v:
+            plt.show()
+        return max_x, (right_x, right_y)
+
+    return eat_peak(right_x, right_y, n - 1, v=v)
 
 
 def delay_for_x_y_pairs_couple(x_a, y_a, x_b, y_b, v=False):
     peak_a, _ = eat_peak(x_a, y_a, v=v)
 
-    _, right = eat_peak(x_b, y_b, v=v)
-    peak_b, _ = eat_peak(*right, v=v)
+    peak_b, _ = eat_peak(x_b, y_b, n=2, v=v)
 
     if v:
         plt.plot(x_a, y_a)
