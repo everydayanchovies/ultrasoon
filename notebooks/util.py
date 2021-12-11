@@ -107,7 +107,7 @@ def eat_peak(x, y, n=1, v=False):
     right = x[max_i:], y[max_i:]
 
     if v:
-        plt.plot(x, y, linestyle="dashed")
+        plt.plot(x, y, alpha=1/n)
         plt.plot(*right)
 
     if n > 1:
@@ -119,10 +119,8 @@ def eat_peak(x, y, n=1, v=False):
     return x[max_i], right
 
 
-
 def delay_for_x_y_pairs_couple(x_a, y_a, x_b, y_b, v=False):
     peak_a, _ = eat_peak(x_a, y_a, v=v)
-
     peak_b, _ = eat_peak(x_b, y_b, n=2, v=v)
 
     if v:
