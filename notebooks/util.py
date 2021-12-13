@@ -8,12 +8,6 @@ DF_PART_B = "B"
 
 
 def x_y_pairs_for_csv(path):
-    """
-    Leest een csv bestand op en zet het om in een dataframe.
-
-    :param path: het pad van de csv bestand om te lezen
-    :return: een dataframe
-    """
     df = pd.read_csv(path, delimiter='\t')
     df.columns = ["x", "y"]
     return np.array(df["x"]), np.array(df["y"])
@@ -35,8 +29,12 @@ def x_y_pairs_couple_for_params(salinity, v=False):
 
     def envelope_for_x_y_pairs(x, y):
         y = y - np.mean(y)
-        y = np.abs(hilbert(y))
-        return x, y
+        y_env = np.abs(hilbert(y))
+
+        if v:
+            plt.plot(x, y)
+            plt.plot(x, y_env)
+        return x, y_env
 
     a = avg_x_y_pairs(DF_PART_A)
     a = envelope_for_x_y_pairs(*a)
