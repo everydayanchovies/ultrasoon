@@ -104,29 +104,29 @@ def eat_peak(x, y, n=1, v=False):
     next_min_i = index_of_next_min(y)
 
     max_i = index_of_next_peak(y[next_min_i:]) + next_min_i
-    right = x[max_i:], y[max_i:]
+    leftovers = x[max_i:], y[max_i:]
 
     if v:
         plt.plot(x, y, alpha=1/n)
-        plt.plot(*right)
+        plt.plot(*leftovers)
 
     if n > 1:
-        return eat_peak(*right, n - 1, v=v)
+        return eat_peak(*leftovers, n - 1, v=v)
 
     if v:
         plt.show()
 
-    return x[max_i], right
+    return x[max_i], y[max_i], leftovers
 
 
 def delay_for_x_y_pairs_couple(x_a, y_a, x_b, y_b, v=False):
-    peak_a, _ = eat_peak(x_a, y_a, v=v)
-    peak_b, _ = eat_peak(x_b, y_b, n=2, v=v)
+    peak_a_x, peak_a_y, _ = eat_peak(x_a, y_a, n=2, v=v)
+    peak_b_x, peak_b_y, _ = eat_peak(x_b, y_b, n=1, v=v)
 
     if v:
         plt.plot(x_a, y_a)
         plt.plot(x_b, y_b)
-        plt.hlines(50, peak_a, peak_b, colors='r')
+        plt.hlines(min(peak_a_y, peak_b_y), peak_a_x, peak_b_x, colors='r')
         plt.show()
 
-    return peak_b - peak_a
+    return peak_b_x - peak_a_x
