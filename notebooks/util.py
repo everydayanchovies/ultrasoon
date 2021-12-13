@@ -127,6 +127,8 @@ def delay_for_x_y_pairs_couple(x_a, y_a, x_b, y_b, v=False):
         plt.plot(x_a, y_a)
         plt.plot(x_b, y_b)
         plt.hlines(min(peak_a_y, peak_b_y), peak_a_x, peak_b_x, colors='r')
+        plt.xlabel(r"Time [ms]")
+        plt.ylabel(r"Amplitude [V]")
         plt.show()
 
     return peak_b_x - peak_a_x
